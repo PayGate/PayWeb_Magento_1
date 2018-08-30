@@ -1,0 +1,20 @@
+<?php
+/*
+ * Copyright (c) 2018 PayGate (Pty) Ltd
+ *
+ * Author: App Inlet (Pty) Ltd
+ *
+ * Released under the GNU General Public License
+ */
+$methodCode = Mage::getSingleton( 'checkout/session' )->getQuote()->getPayment()->getMethod();
+if ( $methodCode == 'pay_functions' ) {
+    $baseURL = Mage::getBaseUrl();
+    ?>
+<script type="text/javascript">
+jQuery(document).ready(function(){
+    jQuery(".btn-checkout").attr( "onClick", "createPayOrder('<?php echo $baseURL ?>');" );
+});
+</script>
+<?php
+}
+?>

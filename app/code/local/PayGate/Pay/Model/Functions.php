@@ -62,12 +62,21 @@ class PayGate_Pay_Model_Functions extends Mage_Payment_Model_Method_Abstract
 
     public function getOrder()
     {
-        $order   = Mage::getModel( 'sales/order' );
-        $session = Mage::getSingleton( 'checkout/session' );
-        $order->loadByIncrementId( $session->getLastRealOrderId() );
-
-        return $order;
+		$quote = Mage::getSingleton( 'checkout/session' )->getQuote();
+        $quote->collectTotals()->save();
+		$quoteId = $quote->getId();
+        $service = Mage::getModel( 'sales/service_quote', $quote );
+		$service->submitAll();
+		$order = $service->getOrder();
+        $increment_id = $service->getOrder()->getRealOrderId();
+		
+		$checkoutSession = Mage::getSingleton('checkout/type_onepage')->getCheckout();
+		$checkoutSession->setLastSuccessQuoteId($quoteId);
+		$checkoutSession->setLastQuoteId($quoteId);
+		$checkoutSession->setLastOrderId($order->getIncrementId());
+		return $order;
     }
+	
 
     public function getOrderPlaceRedirectUrl()
     {
