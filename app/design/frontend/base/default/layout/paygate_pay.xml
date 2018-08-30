@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/*
+ * Copyright (c) 2018 PayGate (Pty) Ltd
+ *
+ * Author: App Inlet (Pty) Ltd
+ * 
+ * Released under the GNU General Public License
+ */
+-->
+<layout version="0.1.0">
+    <checkout_onepage_index>
+        <reference name="head">
+		    <action method="addJs"><script>pay/payPopup.js</script></action>
+            <action method="addItem"><type>skin_css</type><name>css/payPopupStyle.css</name></action>
+            <action method="addItem"><type>skin_css</type><name>css/payPopupStyle.min.css</name></action>
+        </reference>
+    </checkout_onepage_index>
+	<checkout_onepage_review>
+        <reference name="checkout.onepage.review.info.items.after">
+            <block type="core/template" name="checkout.onepage.review.paycheck" template="pay/checkout/onepage/review/paycheck.phtml"/>
+        </reference>
+    </checkout_onepage_review>
+</layout>

@@ -20,6 +20,26 @@
 				<class>PayGate_Pay_Model</class>
 			</pay>
 		</models>
+		<resources>
+            <pay_setup>
+                <setup>
+                    <module>PayGate_Pay</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </pay_setup>
+            <pay_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </pay_write>
+            <pay_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </pay_read>
+        </resources>
 	</global>
 	<frontend>
 		<routers>
@@ -31,6 +51,13 @@
 				</args>
 			</pay>
 		</routers>
+		<layout>
+            <updates>
+               <pay>
+                <file>paygate_pay.xml</file>   
+				</pay>
+            </updates>
+      </layout>
 	</frontend>
 	<default>
 		<payment>
