@@ -1,0 +1,9 @@
+=====================================
+Date	  : Version: Description
+=====================================
+
+2015-11-10: v1.0.1 : Support PayGate payweb3
+2017-02-07: v1.0.2 : Update email sending to only send once notification received from PayGate.
+                     Clean up code and simplify.
+2018-08-01: v1.0.3 : Support for 1.9.3 - Fix failed and cancelled order processes and general code cleanup
+2018-08-30: v1.0.4 : iFrame version
