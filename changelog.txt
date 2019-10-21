@@ -7,3 +7,5 @@ Date	  : Version: Description
                      Clean up code and simplify.
 2018-08-01: v1.0.3 : Support for 1.9.3 - Fix failed and cancelled order processes and general code cleanup
 2018-08-30: v1.0.4 : iFrame version
+2019-10-18: v1.0.5 : Fix duplicate order and invoice creation 
+                     Magento 1.9.4.x compatibility 
