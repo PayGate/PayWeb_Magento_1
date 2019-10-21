@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (c) 2019 PayGate (Pty) Ltd
+ *
+ * Author: App Inlet (Pty) Ltd
+ * 
+ * Released under the GNU General Public License
+ */
+-->
+<config>
+	<modules>
+		<PayGate_Pay>
+			<version>1.0.3</version>
+		</PayGate_Pay>
+	</modules>
+	<global>
+		<models>
+			<pay>
+				<class>PayGate_Pay_Model</class>
+			</pay>
+		</models>
+		<resources>
+            <pay_setup>
+                <setup>
+                    <module>PayGate_Pay</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </pay_setup>
+            <pay_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </pay_write>
+            <pay_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </pay_read>
+        </resources>
+	</global>
+	<frontend>
+		<routers>
+			<pay>
+				<use>standard</use>
+				<args>
+					<frontName>pay</frontName>
+					<module>PayGate_Pay</module>
+				</args>
+			</pay>
+		</routers>
+		<layout>
+            <updates>
+               <pay>
+                <file>paygate_pay.xml</file>   
+				</pay>
+            </updates>
+      </layout>
+	</frontend>
+	<default>
+		<payment>
+			<pay_functions>
+				<active>0</active>
+				<title>Pay with PayGate</title>
+				<order_status>pending</order_status>
+				<order_placed_email>0</order_placed_email>
+				<order_successful_email>1</order_successful_email>
+				<order_failed_email>0</order_failed_email>
+				<model>pay/functions</model>
+			</pay_functions>
+		</payment>
+	</default>
+</config>
