@@ -73,7 +73,7 @@ class PayGate_Pay_ProcessingController extends Mage_Core_Controller_Front_Action
             'EMAIL' => $order->getCustomerEmail(),
             'NOTIFY_URL' => $module->getNotifyUrl(),
             'USER2' => $orderId,
-            'USER3' => 'magento-v' . Mage::getVersion() . ' - plugin-v1.0.2',
+            'USER3' => 'magento-v' . Mage::getVersion() . ' - plugin-v1.0.5',
         );
 
         $fields['CHECKSUM'] = md5(implode('', $fields) . $module->getSecretKey());
