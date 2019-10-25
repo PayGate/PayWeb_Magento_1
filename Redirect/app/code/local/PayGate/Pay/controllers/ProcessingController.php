@@ -72,7 +72,7 @@ class PayGate_Pay_ProcessingController extends Mage_Core_Controller_Front_Action
             'EMAIL'            => $order->getCustomerEmail(),
             'NOTIFY_URL'       => $module->getNotifyUrl(),
             'USER2'            => $orderId,
-            'USER3'            => 'magento-v' . Mage::getVersion() . ' - plugin-v1.0.5',
+            'USER3'            => 'magento-v' . Mage::getVersion() . ' - plugin-v1.0.6',
         );
 
         $fields['CHECKSUM'] = md5( implode( '', $fields ) . $module->getSecretKey() );
@@ -214,19 +214,29 @@ HTML;
          */
         $order = Mage::getModel( 'sales/order' )->loadByIncrementId( $orderId );
 
+        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)->save();
+
+        $payment = $order->getPayment();
+        $payment->save();
+
         /**
          * @var $invoice Mage_Sales_Model_Order_Invoice
          */
         $invoice = $order->prepareInvoice();
-        $invoice->setState( Mage_Sales_Model_Order_Invoice::STATE_PAID );
         $invoice->register()->capture();
-        $order->addRelatedObject( $invoice );
 
-        $order->addStatusToHistory( Mage_Sales_Model_Order::STATE_PROCESSING, 'Redirect Response: The User Completed Payment with PayGate' );
-        $order->save();
+        Mage::getModel( 'core/resource_transaction' )
+           ->addObject( $invoice )
+           ->addObject( $invoice->getOrder() )
+           ->save();
 
         if ( $module->getSendInvoiceEmail() ? true : false ) {
-            $invoice->sendEmail();
+            $message = Mage::helper( 'paygate' )->__( 'Notified customer about invoice #%s.', $invoice->getIncrementId() );
+            $comment = $order->sendNewOrderEmail()->addStatusHistoryComment( $message )
+              ->setIsCustomerNotified( true )
+              ->save();
+        } else {
+            $comment = $order->save();
         }
         $this->clearCart();
 
