@@ -23,6 +23,7 @@
 }
 
 #payPopupFrame{
+    min-width: 995px;
 	margin:0px;
 	padding:0px;
 	border:none;
