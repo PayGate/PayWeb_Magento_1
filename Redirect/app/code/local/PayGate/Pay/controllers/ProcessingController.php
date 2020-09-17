@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2019 PayGate (Pty) Ltd
+ * Copyright (c) 2020 PayGate (Pty) Ltd
  *
  * Author: App Inlet (Pty) Ltd
  *
@@ -65,7 +65,7 @@ class PayGate_Pay_ProcessingController extends Mage_Core_Controller_Front_Action
             'REFERENCE'        => $order->getRealOrderId(),
             'AMOUNT'           => number_format( $order->getGrandTotal(), 2, '', '' ),
             'CURRENCY'         => $order->getOrderCurrencyCode(),
-            'RETURN_URL'       => $module->getReturnUrl(),
+            'RETURN_URL'       => $module->getReturnUrl() . '?gid=' . $order->getRealOrderId() . '&qid=' . $quoteId,
             'TRANSACTION_DATE' => date( 'Y-m-d H:i' ),
             'LOCALE'           => str_replace( '_', '-', Mage::app()->getLocale()->getLocaleCode() ),
             'COUNTRY'          => $country_code3,
@@ -100,7 +100,7 @@ HTML;
 
             $session = Mage::getSingleton( 'checkout/session' );
 
-            $status = $_POST['TRANSACTION_STATUS'];
+            $status = filter_var( $_POST['TRANSACTION_STATUS'], FILTER_SANITIZE_STRING );
 
             /**
              * @var $module PayGate_Pay_Model_Functions
@@ -108,31 +108,30 @@ HTML;
             $module = Mage::getModel( 'pay/functions' );
             $key    = $module->getSecretKey();
 
-            $session   = Mage::getSingleton( 'checkout/session' );
-            $reference = $session->getData( 'REFERENCE' );
+            $orderId = filter_var( $_GET['gid'], FILTER_SANITIZE_STRING );
+            $quoteId = filter_var( $_GET['qid'], FILTER_SANITIZE_STRING );
 
             $queryFields = [
                 'PAYGATE_ID'     => $module->getID(),
-                'PAY_REQUEST_ID' => $_POST['PAY_REQUEST_ID'],
-                'REFERENCE'      => $reference,
+                'PAY_REQUEST_ID' => filter_var( $_POST['PAY_REQUEST_ID'], FILTER_SANITIZE_STRING ),
+                'REFERENCE'      => $orderId,
             ];
-
             $queryFields['CHECKSUM'] = md5( implode( '', $queryFields ) . $key );
             $response                = $this->curlPost( 'https://secure.paygate.co.za/payweb3/query.trans', $queryFields );
             parse_str( $response, $queryFields );
 
             if ( count( $queryFields ) > 0 ) {
-                $orderId = $queryFields['USER2'];
+                $orderId = filter_var( $queryFields['USER2'], FILTER_SANITIZE_STRING );
                 switch ( $status ) {
                     case 1:
-                        $this->successful( $orderId );
+                        $this->successful( $orderId, $quoteId );
                         break;
                     case 2:
-                        $this->failed( $orderId );
+                        $this->failed( $orderId, $quoteId );
                         break;
                     case 0:
                     case 4:
-                        $this->canceled( $orderId );
+                        $this->canceled( $orderId, $quoteId );
                         break;
                     default:
                         header( 'Location:' . Mage::getUrl() );
@@ -160,7 +159,7 @@ HTML;
         }
     }
 
-    public function canceled( $orderId )
+    public function canceled( $orderId, $quoteId = false )
     {
         /**
          * @var $order Mage_Sales_Model_Order
@@ -178,7 +177,7 @@ HTML;
          */
         $session = Mage::getSingleton( 'checkout/session' );
 
-        if ( $quoteId = $session->getQuoteId() ) {
+        if ( $quoteId ) {
             /**
              * @var $quote Mage_Sales_Model_Quote
              */
@@ -202,7 +201,7 @@ HTML;
         die;
     }
 
-    public function successful( $orderId )
+    public function successful( $orderId, $quoteId = false )
     {
         /**
          * @var $module PayGate_Pay_Model_Functions
@@ -214,7 +213,7 @@ HTML;
          */
         $order = Mage::getModel( 'sales/order' )->loadByIncrementId( $orderId );
 
-        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)->save();
+        $order->setState( Mage_Sales_Model_Order::STATE_PENDING_PAYMENT )->save();
 
         $payment = $order->getPayment();
         $payment->save();
@@ -226,23 +225,25 @@ HTML;
         $invoice->register()->capture();
 
         Mage::getModel( 'core/resource_transaction' )
-           ->addObject( $invoice )
-           ->addObject( $invoice->getOrder() )
-           ->save();
+            ->addObject( $invoice )
+            ->addObject( $invoice->getOrder() )
+            ->save();
 
         if ( $module->getSendInvoiceEmail() ? true : false ) {
             $message = Mage::helper( 'paygate' )->__( 'Notified customer about invoice #%s.', $invoice->getIncrementId() );
             $comment = $order->sendNewOrderEmail()->addStatusHistoryComment( $message )
-              ->setIsCustomerNotified( true )
-              ->save();
+                ->setIsCustomerNotified( true )
+                ->save();
         } else {
             $comment = $order->save();
         }
         $this->clearCart();
 
         $checkoutSession = Mage::getSingleton( 'checkout/type_onepage' )->getCheckout();
-        $lastqid         = $checkoutSession->getLastQuoteId();
-        $checkoutSession->setLastSuccessQuoteId( $lastqid );
+        $checkoutSession->setLastSuccessQuoteId( $quoteId );
+        $checkoutSession->setLastQuoteId( $quoteId );
+        $checkoutSession->setLastOrderId( $orderId );
+        $checkoutSession->setLastRealOrderId( $orderId );
 
         $url = Mage::getUrl( 'checkout/onepage/success' );
 
@@ -264,7 +265,7 @@ HTML;
         }
     }
 
-    public function failed( $orderId )
+    public function failed( $orderId, $quoteId = false )
     {
         /**
          * @var $order Mage_Sales_Model_Order
@@ -281,7 +282,7 @@ HTML;
          */
         $session = Mage::getSingleton( 'checkout/session' );
 
-        if ( $quoteId = $session->getQuoteId() ) {
+        if ( $quoteId ) {
             /**
              * @var $quote Mage_Sales_Model_Quote
              */

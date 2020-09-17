@@ -10,3 +10,4 @@ Date	  : Version: Description
 2019-10-18: v1.0.5 : Fix duplicate order and invoice creation 
                      Magento 1.9.4.x compatibility 
 2019-10-25: v1.0.6 : Alternate invoicing approach.
+2020-09-17: v1.0.7 : Fix sessions cleared in some browsers.
