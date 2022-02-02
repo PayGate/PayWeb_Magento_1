@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2020 PayGate (Pty) Ltd
+ * Copyright (c) 2022 PayGate (Pty) Ltd
  *
  * Author: App Inlet (Pty) Ltd
  *
@@ -72,7 +72,7 @@ class PayGate_Pay_ProcessingController extends Mage_Core_Controller_Front_Action
             'EMAIL'            => $order->getCustomerEmail(),
             'NOTIFY_URL'       => $module->getNotifyUrl(),
             'USER2'            => $orderId,
-            'USER3'            => 'magento-v' . Mage::getVersion() . ' - plugin-v1.0.6',
+            'USER3'            => 'magento-v' . Mage::getVersion() . ' - plugin-v1.0.8',
         );
 
         $fields['CHECKSUM'] = md5( implode( '', $fields ) . $module->getSecretKey() );
@@ -213,7 +213,7 @@ HTML;
          */
         $order = Mage::getModel( 'sales/order' )->loadByIncrementId( $orderId );
 
-        $order->setState( Mage_Sales_Model_Order::STATE_PENDING_PAYMENT )->save();
+        $order->setState( Mage_Sales_Model_Order::STATE_PROCESSING )->save();
 
         $payment = $order->getPayment();
         $payment->save();
@@ -223,17 +223,20 @@ HTML;
          */
         $invoice = $order->prepareInvoice();
         $invoice->register()->capture();
+        $invoice->save();
+        $order->save();
 
         Mage::getModel( 'core/resource_transaction' )
             ->addObject( $invoice )
             ->addObject( $invoice->getOrder() )
             ->save();
 
-        if ( $module->getSendInvoiceEmail() ? true : false ) {
+        if ( $module->getSendInvoiceEmail() ) {
             $message = Mage::helper( 'paygate' )->__( 'Notified customer about invoice #%s.', $invoice->getIncrementId() );
             $comment = $order->sendNewOrderEmail()->addStatusHistoryComment( $message )
                 ->setIsCustomerNotified( true )
                 ->save();
+            $invoice->sendEmail();
         } else {
             $comment = $order->save();
         }
@@ -242,19 +245,10 @@ HTML;
         $checkoutSession = Mage::getSingleton( 'checkout/type_onepage' )->getCheckout();
         $checkoutSession->setLastSuccessQuoteId( $quoteId );
         $checkoutSession->setLastQuoteId( $quoteId );
-        $checkoutSession->setLastOrderId( $orderId );
+        $checkoutSession->setLastOrderId( $order->getId() );
         $checkoutSession->setLastRealOrderId( $orderId );
 
-        $url = Mage::getUrl( 'checkout/onepage/success' );
-
-        echo <<<HTML
-<html>
-<body>
-    <script>window.location='$url';</script>
-</body>
-</html>
-HTML;
-        die;
+        $this->_redirect('checkout/onepage/success');
     }
 
     public function clearCart()

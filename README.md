@@ -1,12 +1,12 @@
 # PayWeb_Magento_1
-## PayGate Magento plugin v1.0.7 for Magento v1.9.4.x
+## PayGate Magento plugin v1.0.8 for Magento v1.9.4.x
 
 This is the PayGate PayWeb3 plugin for Magento 1. Please feel free to contact the PayGate support team at support@paygate.co.za should you require any assistance.
 
 ## Installation
 [![How To Setup PayGate PayWeb for Magento 1](https://appinlet.com/wp-content/uploads/2021/01/How-To-Setup-PayGate-PayWeb-for-Magento-1.jpg)](https://www.youtube.com/watch?v=jv_mGpYW7yA "How To Setup PayGate PayWeb for Magento 1")
 
-Please navigate to the [releases page](https://github.com/PayGate/PayWeb_Magento_1/releases), download the latest release (v1.0.7) and unzip. You will then be able to follow the integration guide PDF which is included in the zip.
+Please navigate to the [releases page](https://github.com/PayGate/PayWeb_Magento_1/releases), download the latest release (v1.0.8) and unzip. You will then be able to follow the integration guide PDF which is included in the zip.
 
 ## Collaboration
 

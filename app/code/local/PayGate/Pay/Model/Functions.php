@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2020 PayGate (Pty) Ltd
+ * Copyright (c) 2022 PayGate (Pty) Ltd
  *
  * Author: App Inlet (Pty) Ltd
  *
@@ -43,22 +43,22 @@ class PayGate_Pay_Model_Functions extends Mage_Payment_Model_Method_Abstract
 
     public function getOrderPlacedEmail()
     {
-        return $this->getConfigData( 'order_placed_email' );
+        return (int)$this->getConfigData( 'order_placed_email' ) === 1;
     }
 
     public function getOrderSuccessfulEmail()
     {
-        return $this->getConfigData( 'order_successful_email' );
+        return (int)$this->getConfigData( 'order_successful_email' ) === 1;
     }
 
     public function getOrderFailedEmail()
     {
-        return $this->getConfigData( 'order_failed_email' );
+        return (int)$this->getConfigData( 'order_failed_email' ) === 1;
     }
 
     public function getSendInvoiceEmail()
     {
-        return $this->getConfigData( 'send_invoice_email' );
+        return (int)$this->getConfigData( 'send_invoice_email' ) === 1;
     }
 
     public function getOrder()
